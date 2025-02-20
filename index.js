@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
 const port = process.env.PORT || 5000
@@ -26,6 +26,7 @@ async function run() {
 
     const db = client.db('Task')
     const usersCollection = db.collection('users')
+    const tasksCollection = db.collection('tasks')
 
     // save user in db
 
@@ -38,6 +39,55 @@ async function run() {
           return res.send(isExist)
         }
         const result = await usersCollection.insertOne({...user, timestamp: Date.now()})
+        res.send(result)
+      })
+
+      app.post('/tasks', async (req, res) => {
+        const carData  = req.body
+        const result = await tasksCollection.insertOne(carData)
+        // console.log(result)
+        res.send(result)
+      })
+  
+      app.get('/tasks/:email', async(req, res) => {
+        const result = await tasksCollection.find().toArray()
+        res.send(result)
+      })
+  
+    //   app.get('/tasks/:email', async(req, res) => {
+    //     // const decodedEmail = req.user?.email
+    //     const email = req.params.email
+    //     // console.log(email,decodedEmail)
+    //     // if (decodedEmail !== email) 
+    //     //    return res.status(401).send({ message: 'unauthorized access' })
+
+    //     const result = await tasksCollection.find(query,options).toArray()
+    //     res.send(result)
+    //   })
+  
+      app.delete('/tasks/:id', async(req, res) => {
+        const id = req.params.id
+        const query = { _id: new ObjectId(id)}
+        const result = await tasksCollection.deleteOne(query)
+        res.send(result)
+      })
+  
+    //   app.get('/car/:id', async(req, res) => {
+    //     const id = req.params.id
+    //     const query = { _id: new ObjectId(id) }
+    //     const result = await carsCollection.findOne(query)
+    //     res.send(result)
+    //   })
+  
+      app.put('/tasks/:id', async (req, res) => {
+        const id = req.params.id
+        const taskData  = req.body
+        const updated = {
+          $set: taskData,
+        }
+        const query = { _id: new ObjectId(id) }
+        const options = { upsert: false }
+        const result = await tasksCollection.updateOne(query, updated, options)
         res.send(result)
       })
 
