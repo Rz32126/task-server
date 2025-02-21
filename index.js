@@ -42,9 +42,10 @@ async function run() {
         res.send(result)
       })
 
+    //  save task in db
       app.post('/tasks', async (req, res) => {
-        const carData  = req.body
-        const result = await tasksCollection.insertOne(carData)
+        const taskData  = req.body
+        const result = await tasksCollection.insertOne({...taskData,timestamp: Date.now()})
         // console.log(result)
         res.send(result)
       })
@@ -72,12 +73,12 @@ async function run() {
         res.send(result)
       })
   
-    //   app.get('/car/:id', async(req, res) => {
-    //     const id = req.params.id
-    //     const query = { _id: new ObjectId(id) }
-    //     const result = await carsCollection.findOne(query)
-    //     res.send(result)
-    //   })
+      app.get('/tasks/:id', async(req, res) => {
+        const id = req.params.id
+        const query = { _id: new ObjectId(id) }
+        const result = await tasksCollection.findOne(query)
+        res.send(result)
+      })
   
       app.put('/tasks/:id', async (req, res) => {
         const id = req.params.id
@@ -90,7 +91,7 @@ async function run() {
         const result = await tasksCollection.updateOne(query, updated, options)
         res.send(result)
       })
-
+   
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
