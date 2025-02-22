@@ -55,16 +55,6 @@ async function run() {
         res.send(result)
       })
   
-    //   app.get('/tasks/:email', async(req, res) => {
-    //     // const decodedEmail = req.user?.email
-    //     const email = req.params.email
-    //     // console.log(email,decodedEmail)
-    //     // if (decodedEmail !== email) 
-    //     //    return res.status(401).send({ message: 'unauthorized access' })
-
-    //     const result = await tasksCollection.find(query,options).toArray()
-    //     res.send(result)
-    //   })
   
       app.delete('/tasks/:id', async(req, res) => {
         const id = req.params.id
@@ -91,7 +81,33 @@ async function run() {
         const result = await tasksCollection.updateOne(query, updated, options)
         res.send(result)
       })
-   
+
+    
+   app.patch("/tasks/:id/category", async (req, res) => {
+      try {
+    const { category } = req.body;
+    if (!["To-Do", "In Progress", "Done"].includes(category)) {
+      return res.status(400).json({ message: "Invalid category" });
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id,
+      { category },
+      { new: true }
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.json(updatedTask);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating category", error });
+  }
+});
+
+
+      
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
